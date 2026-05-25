@@ -2,6 +2,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import React from 'react';
 import { ActivityIndicator, Platform, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { supabase } from '../config/supabaseConfig';
 import { useAuth } from '../store/AuthContext';
 
 export default function Header() {
@@ -27,14 +28,27 @@ export default function Header() {
             }
 
             return (
-                <TouchableOpacity
-                    style={[styles.loginButton, { backgroundColor: '#007AFF' }]}
-                    onPress={() => router.push(targetPath as any)}
-                    activeOpacity={0.8}
-                >
-                    <Ionicons name="apps-outline" size={20} color="#fff" style={{ marginRight: 6 }} />
-                    <Text style={styles.loginButtonText}>{label}</Text>
-                </TouchableOpacity>
+                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
+                    <TouchableOpacity
+                        style={[styles.loginButton, { backgroundColor: '#007AFF' }]}
+                        onPress={() => router.push(targetPath as any)}
+                        activeOpacity={0.8}
+                    >
+                        <Ionicons name="apps-outline" size={20} color="#fff" style={{ marginRight: 6 }} />
+                        <Text style={styles.loginButtonText}>{label}</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                        style={[styles.loginButton, { backgroundColor: '#e74c3c' }]}
+                        onPress={async () => {
+                            await supabase.auth.signOut();
+                            router.replace('/');
+                        }}
+                        activeOpacity={0.8}
+                    >
+                        <Ionicons name="log-out-outline" size={20} color="#fff" style={{ marginRight: 6 }} />
+                        <Text style={styles.loginButtonText}>Logout</Text>
+                    </TouchableOpacity>
+                </View>
             );
         }
 

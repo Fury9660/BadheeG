@@ -566,7 +566,6 @@ const SellerRegistrationScreen = () => {
             if (dbError) throw dbError;
 
             // Clear saved progress after successful registration
-            const currentUid = uid || 'temp_user';
             const storageKey = `registration_progress_${currentUid}`;
             await AsyncStorage.removeItem(storageKey);
 
