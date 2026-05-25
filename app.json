@@ -1,0 +1,36 @@
+{
+  "expo": {
+    "name": "Badhee G",
+    "slug": "PartnerApp",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/images/icon.png",
+    "scheme": "partnerapp",
+    "userInterfaceStyle": "automatic",
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.anonymous.PartnerApp"
+    },
+    "android": {
+      "package": "com.anonymous.PartnerApp"
+    },
+    "web": {
+      "favicon": "./assets/images/favicon.png",
+      "bundler": "metro"
+    },
+    "plugins": [
+      "expo-router",
+      "expo-secure-store",
+      "expo-asset"
+    ],
+    "experiments": {
+      "typedRoutes": true
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "d6528c62-70b9-4ab1-8f22-1973fd9e1eee"
+      }
+    }
+  }
+}
