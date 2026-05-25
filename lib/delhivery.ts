@@ -5,6 +5,7 @@ interface ShipmentDetails {
     customerName: string;
     customerAddress: string;
     customerCity: string;
+    customerState?: string;
     customerPincode: string;
     customerPhone: string;
     paymentMode: 'Prepaid' | 'COD';
@@ -62,7 +63,7 @@ export const createShipment = async (details: ShipmentDetails, defaultPickupLoca
                 "consignee_name": details.customerName || 'Customer',
                 "address": details.customerAddress || 'No Address',
                 "city": details.customerCity || 'City',
-                "state": details.customerCity || 'State', // Note: using customerCity as state is kept as is, but could be adjusted. We leave the value as is.
+                "state": details.customerState || details.customerCity || 'State',
                 "zip": details.customerPincode || '110001',
                 "phone": details.customerPhone || '9999999999',
                 "gstin": "UR",
@@ -109,7 +110,7 @@ export const createShipment = async (details: ShipmentDetails, defaultPickupLoca
                     "consignee_name": details.customerName || 'Customer',
                     "consignee_address": details.customerAddress || 'No Address',
                     "consignee_city": details.customerCity || 'City',
-                    "consignee_state": details.customerCity || 'State',
+                    "consignee_state": details.customerState || details.customerCity || 'State',
                     "consignee_pincode": details.customerPincode || '110001',
                     "consignee_phone": details.customerPhone || '9999999999',
                     "consignee_gst_tin": "UR",

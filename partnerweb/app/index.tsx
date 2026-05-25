@@ -29,7 +29,7 @@ export default function Index() {
 
     const isRedirecting = user && (
         partnerStatus === null ||
-        ['approved', 'active', 'pending', 'unregistered'].includes(partnerStatus.toLowerCase())
+        ['approved', 'active', 'pending'].includes(partnerStatus.toLowerCase())
     );
 
     useEffect(() => {
@@ -40,11 +40,6 @@ export default function Index() {
                 router.replace('/partners/dashboard');
             } else if (status === 'pending') {
                 router.replace('/partners/approval-pending');
-            } else if (status === 'unregistered') {
-                router.replace({
-                    pathname: '/partners/register',
-                    params: { phoneNumber: user.phone, uid: user.id }
-                });
             }
         }
     }, [user, partnerStatus, isAuthLoading]);

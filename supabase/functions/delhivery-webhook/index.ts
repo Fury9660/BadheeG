@@ -10,6 +10,7 @@ const corsHeaders = {
 // Delhivery StatusType → internal status mapping
 // Source: Delhivery Scan Push/Webhook documentation
 const STATUS_MAP: Record<string, { status?: string; delhivery_status: string; label: string }> = {
+  // Legacy shortcodes (Fallback)
   'MF':   { delhivery_status: 'manifested',         label: 'Manifested' },
   'PKD':  { status: 'processing', delhivery_status: 'packed',            label: 'Packed' },
   'PU':   { status: 'shipped',    delhivery_status: 'picked_up',         label: 'Picked Up' },
@@ -22,12 +23,33 @@ const STATUS_MAP: Record<string, { status?: string; delhivery_status: string; la
   'DLY':  { delhivery_status: 'delayed',             label: 'Delayed' },
   'CNX':  { status: 'cancelled',  delhivery_status: 'cancelled',         label: 'Cancelled' },
   'LOST': { delhivery_status: 'lost',                label: 'Lost' },
-  // Also handle full status text as fallback
+
+  // --- Combined StatusType + Status mappings (Official B2B Webhook Docs) ---
+  // Forward shipment flow (UD = Undelivered/Active, DL = Delivered/Terminal)
+  'UD_MANIFESTED': { delhivery_status: 'manifested',        label: 'Manifested' },
+  'UD_NOT PICKED': { status: 'processing', delhivery_status: 'not_picked',    label: 'Not Picked' },
+  'UD_IN TRANSIT': { status: 'shipped',    delhivery_status: 'in_transit',    label: 'In Transit' },
+  'UD_PENDING':    { delhivery_status: 'pending',            label: 'Pending' },
+  'UD_DISPATCHED': { status: 'shipped',    delhivery_status: 'out_for_delivery', label: 'Out for Delivery' },
+  'DL_DELIVERED':  { status: 'delivered',  delhivery_status: 'delivered',     label: 'Delivered' },
+
+  // Return shipment flow (RT = Return Transit, DL = Delivered/Terminal)
+  'RT_IN TRANSIT': { status: 'returned',   delhivery_status: 'rto_in_transit', label: 'RTO In Transit' },
+  'RT_PENDING':    { status: 'returned',   delhivery_status: 'rto_pending',    label: 'RTO Pending' },
+  'RT_DISPATCHED': { status: 'returned',   delhivery_status: 'rto_dispatched', label: 'RTO Dispatched' },
+  'DL_RTO':        { status: 'returned',   delhivery_status: 'rto',            label: 'Returned to Origin' },
+
+  // Lost shipment flow
+  'LT_LOST':       { delhivery_status: 'lost',               label: 'Lost' },
+
+  // --- Full Status Text Fallbacks ---
   'MANIFESTED':       { delhivery_status: 'manifested',        label: 'Manifested' },
-  'PICKED UP':        { status: 'shipped', delhivery_status: 'picked_up',    label: 'Picked Up' },
-  'IN TRANSIT':       { status: 'shipped', delhivery_status: 'in_transit',   label: 'In Transit' },
-  'OUT FOR DELIVERY': { status: 'shipped', delhivery_status: 'out_for_delivery', label: 'Out for Delivery' },
-  'DELIVERED':        { status: 'delivered', delhivery_status: 'delivered',  label: 'Delivered' },
+  'NOT PICKED':       { status: 'processing', delhivery_status: 'not_picked',    label: 'Not Picked' },
+  'PENDING':          { delhivery_status: 'pending',            label: 'Pending' },
+  'DISPATCHED':       { status: 'shipped',    delhivery_status: 'out_for_delivery', label: 'Out for Delivery' },
+  'IN TRANSIT':       { status: 'shipped',    delhivery_status: 'in_transit',   label: 'In Transit' },
+  'OUT FOR DELIVERY': { status: 'shipped',    delhivery_status: 'out_for_delivery', label: 'Out for Delivery' },
+  'DELIVERED':        { status: 'delivered',  delhivery_status: 'delivered',  label: 'Delivered' },
 }
 
 serve(async (req) => {
@@ -126,9 +148,12 @@ async function processEvent(supabase: any, payload: any) {
     raw_data: payload,
   })
 
-  // Map status and update order
-  const key = (statusType || statusText).toUpperCase()
-  const mapping = STATUS_MAP[key]
+  // Map status and update order using composite check (e.g. UD_IN TRANSIT), specific text, or type fallback
+  const keyText = statusText ? statusText.trim().toUpperCase() : ''
+  const keyType = statusType ? statusType.trim().toUpperCase() : ''
+  const combinedKey = keyType && keyText ? `${keyType}_${keyText}` : ''
+
+  const mapping = STATUS_MAP[combinedKey] || STATUS_MAP[keyText] || STATUS_MAP[keyType]
 
   if (mapping) {
     const updatePayload: Record<string, any> = {
@@ -136,11 +161,13 @@ async function processEvent(supabase: any, payload: any) {
     }
 
     if (mapping.status) updatePayload.status = mapping.status
-    if (key === 'DEL') updatePayload.delivered_at = statusDateTime
+    if (mapping.delhivery_status === 'delivered') {
+      updatePayload.delivered_at = statusDateTime
+    }
 
     await supabase.from('orders').update(updatePayload).eq('id', order.id)
-    console.log(`✅ Order ${order.id} updated: ${JSON.stringify(updatePayload)}`)
+    console.log(`✅ Order ${order.id} updated: ${JSON.stringify(updatePayload)} (Mapped from Combined:${combinedKey} / Text:${keyText} / Type:${keyType})`)
   } else {
-    console.warn(`Unknown status type: ${statusType} (${statusText}) — storing event only`)
+    console.warn(`Unknown status type/text: ${statusType} (${statusText}) — storing event only`)
   }
 }

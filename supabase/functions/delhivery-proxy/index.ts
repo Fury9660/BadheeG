@@ -410,6 +410,20 @@ serve(async (req) => {
       }
     }
 
+    // CHECK PINCODE SERVICEABILITY
+    if (action === 'check-pincode') {
+      const { pincode } = details
+      if (!pincode) throw new Error('Pincode is required')
+      const token = await getJwt(username, password, storedTok, BTOB_BASE, LTL_BASE, isTestMode)
+      const res = await fetch(`${LTL_BASE}/pincode-service/${pincode}`, {
+        headers: { 'Authorization': `Bearer ${token}` },
+      })
+      const text = await res.text()
+      let data: any
+      try { data = JSON.parse(text) } catch { data = { raw: text } }
+      return respond(data)
+    }
+
     // GET WAREHOUSES LIST
     if (action === 'get-warehouses') {
       const token = await getJwt(username, password, storedTok, BTOB_BASE, LTL_BASE, isTestMode)

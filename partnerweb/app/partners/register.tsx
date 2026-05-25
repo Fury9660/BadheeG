@@ -52,6 +52,7 @@ const SellerRegistrationScreen = () => {
     const cleanPhoneNumber = (phone: string | string[] | undefined): string => {
         if (!phone || Array.isArray(phone)) return '';
         let cleaned = phone.toString().trim();
+        if (cleaned === 'undefined' || cleaned === 'null') return '';
         // Remove +91 or 91 prefix
         if (cleaned.startsWith('+91')) {
             cleaned = cleaned.substring(3);
@@ -62,10 +63,12 @@ const SellerRegistrationScreen = () => {
     };
 
     const phoneNumber = cleanPhoneNumber(params.phoneNumber);
+    const isPhonePreFilled = phoneNumber.length >= 10;
     const uid = params.uid;
 
     console.log('Registration - Phone Number from params:', params.phoneNumber);
     console.log('Registration - Cleaned Phone Number:', phoneNumber);
+    console.log('Registration - Is Phone Pre-Filled:', isPhonePreFilled);
 
     const [currentStep, setCurrentStep] = useState(1);
     const [isLoading, setIsLoading] = useState(false);
@@ -185,11 +188,9 @@ const SellerRegistrationScreen = () => {
     // Load saved progress on mount
     useEffect(() => {
         const loadSavedProgress = async () => {
-            if (!phoneNumber) return;
-
+            const currentUid = uid || 'temp_user';
             try {
-                const cleanPhoneNumber = (phoneNumber as string).replace('+91', '');
-                const storageKey = `registration_progress_${cleanPhoneNumber}`;
+                const storageKey = `registration_progress_${currentUid}`;
                 const savedData = await AsyncStorage.getItem(storageKey);
 
                 if (savedData) {
@@ -230,16 +231,14 @@ const SellerRegistrationScreen = () => {
         };
 
         loadSavedProgress();
-    }, [phoneNumber]);
+    }, [uid]);
 
     // Auto-save form progress
     useEffect(() => {
-        if (!phoneNumber) return;
-
+        const currentUid = uid || 'temp_user';
         const saveProgress = async () => {
             try {
-                const cleanPhoneNumber = (phoneNumber as string).replace('+91', '');
-                const storageKey = `registration_progress_${cleanPhoneNumber}`;
+                const storageKey = `registration_progress_${currentUid}`;
                 const dataToSave = {
                     form,
                     currentStep,
@@ -257,7 +256,7 @@ const SellerRegistrationScreen = () => {
         }, 500);
 
         return () => clearTimeout(timer);
-    }, [form, currentStep, phoneNumber]);
+    }, [form, currentStep, uid]);
 
     const theme = {
         background: isDarkMode ? '#000' : '#f7f8fc',
@@ -567,11 +566,9 @@ const SellerRegistrationScreen = () => {
             if (dbError) throw dbError;
 
             // Clear saved progress after successful registration
-            if (phoneNumber) {
-                const cleanPhoneNumber = (phoneNumber as string).replace('+91', '');
-                const storageKey = `registration_progress_${cleanPhoneNumber}`;
-                await AsyncStorage.removeItem(storageKey);
-            }
+            const currentUid = uid || 'temp_user';
+            const storageKey = `registration_progress_${currentUid}`;
+            await AsyncStorage.removeItem(storageKey);
 
             Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
             await AsyncStorage.setItem('user_role', 'partner');
@@ -740,7 +737,15 @@ const SellerRegistrationScreen = () => {
                         <View style={styles.headerTitleContainer}>
                             <Text style={[styles.headerTitle, { color: theme.text }]}>Step {currentStep} of 6</Text>
                         </View>
-                        <View style={{ width: 40 }} />
+                        <TouchableOpacity
+                            onPress={async () => {
+                                await supabase.auth.signOut();
+                                router.replace('/partners/login');
+                            }}
+                            style={{ width: 40, height: 40, justifyContent: 'center', alignItems: 'center' }}
+                        >
+                            <Feather name="log-out" size={20} color={theme.text} />
+                        </TouchableOpacity>
                     </View>
                     <View style={styles.progressBarContainer}>
                         <View style={[styles.progressBar, { width: `${(currentStep / 6) * 100}%`, backgroundColor: theme.primary }]} />
@@ -760,9 +765,25 @@ const SellerRegistrationScreen = () => {
                                 <View style={styles.inputGroup}>
                                     <Text style={[styles.label, { color: theme.subtext }]}>Mobile Number</Text>
                                     <TextInput
-                                        style={[styles.input, { color: theme.subtext, borderColor: theme.border, backgroundColor: isDarkMode ? '#222' : '#f0f0f0' }]}
+                                        style={[
+                                            styles.input,
+                                            {
+                                                color: !isPhonePreFilled ? theme.text : theme.subtext,
+                                                borderColor: theme.border,
+                                                backgroundColor: !isPhonePreFilled ? theme.card : (isDarkMode ? '#222' : '#f0f0f0')
+                                            }
+                                        ]}
+                                        placeholder="10 digit mobile number"
+                                        placeholderTextColor={theme.subtext}
                                         value={form.mobileNumber?.replace('+91', '') || ''}
-                                        editable={false}
+                                        onChangeText={t => {
+                                            if (!isPhonePreFilled) {
+                                                setForm(p => ({ ...p, mobileNumber: t.replace(/\D/g, '') }));
+                                            }
+                                        }}
+                                        keyboardType="phone-pad"
+                                        maxLength={10}
+                                        editable={!isPhonePreFilled}
                                     />
                                 </View>
                                 {renderInput("Email ID", "email", "Email Address", "email-address")}

@@ -57,7 +57,7 @@ const OrderDetailsScreen = () => {
             try {
                 const { data, error } = await supabase
                     .from('orders')
-                    .select('*')
+                    .select('*, address:address_id(*)')
                     .eq('id', id)
                     .single();
                 if (error) throw error;
@@ -110,6 +110,7 @@ const OrderDetailsScreen = () => {
                 customerName: order.customerName || order.address?.name || 'Guest',
                 customerAddress: order.shippingAddress || (order.address ? `${order.address.line1}, ${order.address.city}` : ''),
                 customerCity: order.customerCity || order.address?.city || 'City',
+                customerState: order.address?.state || '',
                 customerPincode: order.customerPincode || order.address?.pincode || '110001',
                 customerPhone: order.customerPhone || order.address?.mobile || '',
                 paymentMode: order.payment_method === 'cod' ? 'COD' : 'Prepaid',

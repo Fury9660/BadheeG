@@ -143,6 +143,7 @@ const OrderDetailsScreen = () => {
                 customerName: order.customerName || 'Guest',
                 customerAddress: order.shippingAddress || '',
                 customerCity: order.addresses?.city || 'City',
+                customerState: order.addresses?.state || '',
                 customerPincode: order.addresses?.pincode || '110001',
                 customerPhone: order.customerPhone || '',
                 paymentMode: order.payment_method === 'cod' ? 'COD' : 'Prepaid',

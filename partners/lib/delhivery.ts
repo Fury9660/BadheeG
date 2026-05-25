@@ -5,6 +5,7 @@ interface ShipmentDetails {
     customerName: string;
     customerAddress: string;
     customerCity: string;
+    customerState?: string;
     customerPincode: string;
     customerPhone: string;
     paymentMode: 'Prepaid' | 'COD';
@@ -25,20 +26,23 @@ let tokenExpiry: number = 0;
 
 const getB2BToken = async (): Promise<string> => {
     if (cachedB2BToken && Date.now() < tokenExpiry) return cachedB2BToken;
-    const { baseUrl, username, password } = DelhiveryConfig;
     try {
         const response = await fetch(PROXY_URL, {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY}` },
-            body: JSON.stringify({ action: 'login', config: { baseUrl, username, password } })
+            headers: {
+                'Content-Type': 'application/json',
+                'apikey': process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY || '',
+                'Authorization': `Bearer ${process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY}`
+            },
+            body: JSON.stringify({ action: 'login', details: {} })
         });
         const data = await response.json();
-        if (data.success && data.data?.jwt) {
-            cachedB2BToken = data.data.jwt;
+        if (data.jwt) {
+            cachedB2BToken = data.jwt;
             tokenExpiry = Date.now() + (23 * 60 * 60 * 1000);
-            return data.data.jwt;
+            return data.jwt;
         }
-        throw new Error(data.message || "Auth Failed");
+        throw new Error(data.error || "Auth Failed");
     } catch (error) { throw error; }
 };
 
@@ -59,7 +63,7 @@ export const createShipment = async (details: ShipmentDetails, defaultPickupLoca
                 "consignee_name": details.customerName || 'Customer',
                 "address": details.customerAddress || 'No Address',
                 "city": details.customerCity || 'City',
-                "state": details.customerCity || 'State', // Note: using customerCity as state is kept as is, but could be adjusted. We leave the value as is.
+                "state": details.customerState || details.customerCity || 'State',
                 "zip": details.customerPincode || '110001',
                 "phone": details.customerPhone || '9999999999',
                 "gstin": "UR",
@@ -106,7 +110,7 @@ export const createShipment = async (details: ShipmentDetails, defaultPickupLoca
                     "consignee_name": details.customerName || 'Customer',
                     "consignee_address": details.customerAddress || 'No Address',
                     "consignee_city": details.customerCity || 'City',
-                    "consignee_state": details.customerCity || 'State',
+                    "consignee_state": details.customerState || details.customerCity || 'State',
                     "consignee_pincode": details.customerPincode || '110001',
                     "consignee_phone": details.customerPhone || '9999999999',
                     "consignee_gst_tin": "UR",
@@ -247,16 +251,25 @@ export const createShipment = async (details: ShipmentDetails, defaultPickupLoca
 };
 
 export const trackShipment = async (waybill: string) => {
-    const { baseUrl } = DelhiveryConfig;
     if (!waybill) throw new Error("Waybill is required.");
     try {
-        const token = await getB2BToken();
-        const response = await fetch(`${baseUrl}/lrn/track?lrnum=${waybill}`, {
-            method: 'GET',
-            headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' }
+        const SUPABASE_KEY = process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY || '';
+        // Route via Supabase proxy to avoid CORS issues in browser
+        const response = await fetch(PROXY_URL, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'apikey': SUPABASE_KEY,
+                'Authorization': `Bearer ${SUPABASE_KEY}`
+            },
+            body: JSON.stringify({
+                action: 'track-shipment',
+                details: { lrn: waybill }
+            })
         });
         const data = await response.json();
-        if (!data.success || !data.data) throw new Error("Tracking details not found");
-        return data.data; 
+        if (data.error) throw new Error(data.error);
+        // data contains the tracking response from Delhivery v2/track/:lrn
+        return data;
     } catch (error) { throw error; }
 };
