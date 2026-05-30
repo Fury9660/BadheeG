@@ -69,7 +69,39 @@ const OTPScreen = () => {
         try {
             console.log("Verifying OTP for:", `+91${phoneNumber}`, "with code:", otpCode);
 
-            const { data: { session, user }, error } = await supabase.auth.verifyOtp({
+            // ── STEP 1: Check if entered OTP matches partner's default_otp ──────
+            const mobileClean = String(phoneNumber).replace('+91', '');
+            const { data: partnerByPhone } = await supabase
+                .from('pre_approved_partners')
+                .select('id, status, default_otp, email, password')
+                .or(`mobile_number.eq.${mobileClean},mobile_number.eq.+91${mobileClean}`)
+                .single();
+
+            if (partnerByPhone?.default_otp && otpCode === String(partnerByPhone.default_otp)) {
+                // ── Default OTP matched — bypass Supabase SMS OTP ────────────────
+                console.log("Default OTP matched — bypassing SMS OTP");
+
+                // Derive the synthetic email Supabase uses for phone auth
+                const syntheticEmail = partnerByPhone.email || `${mobileClean}@badheeg.com`;
+                const syntheticPassword = partnerByPhone.password || mobileClean;
+
+                const { data: signInData, error: signInError } = await supabase.auth.signInWithPassword({
+                    email: syntheticEmail,
+                    password: syntheticPassword,
+                });
+
+                if (signInError || !signInData.user) {
+                    // Fallback: try phone OTP path if sign-in fails
+                    console.warn("Default OTP bypass signIn failed, falling back to SMS OTP", signInError?.message);
+                } else {
+                    // Successful bypass login
+                    await handlePostLogin(signInData.user, partnerByPhone);
+                    return;
+                }
+            }
+
+            // ── STEP 2: Normal Supabase SMS OTP verification ─────────────────────
+            const { data: { user }, error } = await supabase.auth.verifyOtp({
                 phone: `+91${phoneNumber}`,
                 token: otpCode,
                 type: 'sms',
@@ -78,47 +110,48 @@ const OTPScreen = () => {
             if (error) throw error;
             if (!user) throw new Error("No user found");
 
+            // Fetch full partner doc by auth user id
             const { data: partnerDoc } = await supabase
                 .from('pre_approved_partners')
                 .select('*')
-                .eq('id', user.id)
+                .eq('user_id', user.id)
                 .single();
 
-            if (partnerDoc) {
-                // Check Partner Status
-                if (partnerDoc.status === 'pending') {
-                    router.replace('/approval-pending');
-                    return;
-                } else if (partnerDoc.status === 'rejected') {
-                    Alert.alert("Account Rejected", "Your partner account has been rejected. Please contact support.");
-                    return;
-                } else if (partnerDoc.status === 'suspended') {
-                    Alert.alert("Account Suspended", "Your partner account has been suspended. Please contact support.");
-                    return;
-                }
+            await handlePostLogin(user, partnerDoc);
 
-                if (intent === 'reset_password') {
-                    router.replace({
-                        pathname: '/reset-password',
-                        params: { phoneNumber: phoneNumber as string }
-                    });
-                    return;
-                }
-
-                if (intent === 'register') {
-                    Alert.alert("Account Exists", "This number is already registered. Logging you in...");
-                }
-                router.replace('/(tabs)/dashboard');
-            } else {
-                Alert.alert("Account Not Found", "No partner account found for this number. Please contact the administrator to get your account created.");
-                await supabase.auth.signOut();
-                router.replace('/login');
-            }
         } catch (error: any) {
             console.error("Verification Error:", error);
             Alert.alert("Verification Failed", error.message || "The code you entered is invalid.");
         } finally {
             setLoading(false);
+        }
+    };
+
+    // ── Shared post-login routing logic ──────────────────────────────────────
+    const handlePostLogin = async (user: any, partnerDoc: any) => {
+        if (partnerDoc) {
+            if (partnerDoc.status === 'pending') {
+                router.replace('/approval-pending');
+                return;
+            } else if (partnerDoc.status === 'rejected') {
+                Alert.alert("Account Rejected", "Your partner account has been rejected. Please contact support.");
+                return;
+            } else if (partnerDoc.status === 'suspended') {
+                Alert.alert("Account Suspended", "Your partner account has been suspended. Please contact support.");
+                return;
+            }
+            if (intent === 'reset_password') {
+                router.replace({ pathname: '/reset-password', params: { phoneNumber: phoneNumber as string } });
+                return;
+            }
+            if (intent === 'register') {
+                Alert.alert("Account Exists", "This number is already registered. Logging you in...");
+            }
+            router.replace('/(tabs)/dashboard');
+        } else {
+            Alert.alert("Account Not Found", "No partner account found. Please contact the administrator.");
+            await supabase.auth.signOut();
+            router.replace('/login');
         }
     };
 

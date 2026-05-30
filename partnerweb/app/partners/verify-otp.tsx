@@ -69,7 +69,36 @@ const OTPScreen = () => {
         try {
             console.log("Verifying OTP for:", `+91${phoneNumber}`, "with code:", otpCode);
 
-            const { data: { session, user }, error } = await supabase.auth.verifyOtp({
+            // ── STEP 1: Check if entered OTP matches partner's default_otp ──────
+            const mobileClean = String(phoneNumber).replace('+91', '');
+            const { data: partnerByPhone } = await supabase
+                .from('pre_approved_partners')
+                .select('id, status, default_otp, email, password')
+                .or(`mobile_number.eq.${mobileClean},mobile_number.eq.+91${mobileClean}`)
+                .single();
+
+            if (partnerByPhone?.default_otp && otpCode === String(partnerByPhone.default_otp)) {
+                // ── Default OTP matched — bypass Supabase SMS OTP ────────────────
+                console.log("Default OTP matched — bypassing SMS OTP");
+
+                const syntheticEmail = partnerByPhone.email || `${mobileClean}@badheeg.com`;
+                const syntheticPassword = partnerByPhone.password || mobileClean;
+
+                const { data: signInData, error: signInError } = await supabase.auth.signInWithPassword({
+                    email: syntheticEmail,
+                    password: syntheticPassword,
+                });
+
+                if (signInError || !signInData.user) {
+                    console.warn("Default OTP bypass signIn failed, falling back to SMS OTP", signInError?.message);
+                } else {
+                    router.replace('/');
+                    return;
+                }
+            }
+
+            // ── STEP 2: Normal Supabase SMS OTP verification ─────────────────────
+            const { data: { user }, error } = await supabase.auth.verifyOtp({
                 phone: `+91${phoneNumber}`,
                 token: otpCode,
                 type: 'sms',
@@ -78,9 +107,6 @@ const OTPScreen = () => {
             if (error) throw error;
             if (!user) throw new Error("No user found");
 
-            // Successful verification - instead of doing complex checks here,
-            // we redirect to the home page and let the centralized AuthContext + index logic handle it.
-            // This prevents race conditions between this page and the main layout.
             router.replace('/');
         } catch (error: any) {
             console.error("Verification Error:", error);
@@ -89,6 +115,7 @@ const OTPScreen = () => {
             setLoading(false);
         }
     };
+
 
     const handleResend = () => {
         if (countdown === 0) {
