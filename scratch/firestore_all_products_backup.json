@@ -1,0 +1,317 @@
+[
+  {
+    "firestoreId": "42Nj54Da3pmyvLpufHeC",
+    "partnerId": "n7rbJXYNIjetMpy4Os2bxvFjxF83",
+    "category": "Furniture",
+    "description": "Premium high-back chair with adjustable lumbar support.",
+    "warranty": "1 Year Warranty",
+    "care": "Wipe with dry cloth",
+    "brand": "ComfortSeats",
+    "specifications": [
+      {
+        "label": "Material",
+        "value": "Mesh & Fabric"
+      },
+      {
+        "label": "Weight Limit",
+        "value": "120 kg"
+      }
+    ],
+    "image": "https://firebasestorage.googleapis.com/v0/b/badhee.firebasestorage.app/o/product_images%2Fn7rbJXYNIjetMpy4Os2bxvFjxF83_1768039168311_0.jpg?alt=media&token=fc645ec9-c642-4684-8952-5d5eb5dbe497",
+    "images": [
+      "https://firebasestorage.googleapis.com/v0/b/badhee.firebasestorage.app/o/product_images%2Fn7rbJXYNIjetMpy4Os2bxvFjxF83_1768039168311_0.jpg?alt=media&token=fc645ec9-c642-4684-8952-5d5eb5dbe497"
+    ],
+    "createdAt": {
+      "_seconds": 1768039172,
+      "_nanoseconds": 124000000
+    },
+    "showroomName": "Yuvraj furniture",
+    "showroomAddress": "Yuvraj ",
+    "price": 15999,
+    "name": "Classic Bed",
+    "mrp": 25999,
+    "showroomPhone": "7300413137",
+    "stock": 25,
+    "updatedAt": {
+      "_seconds": 1768059545,
+      "_nanoseconds": 418000000
+    },
+    "inStock": true
+  },
+  {
+    "firestoreId": "6oM3utMg674UTFis9w8S",
+    "partnerId": "n7rbJXYNIjetMpy4Os2bxvFjxF83",
+    "name": "Ergonomic Office Chair",
+    "price": 8999,
+    "mrp": 15000,
+    "stock": 0,
+    "category": "Furniture",
+    "description": "Premium high-back chair with adjustable lumbar support.",
+    "warranty": "1 Year Warranty",
+    "care": "Wipe with dry cloth",
+    "brand": "ComfortSeats",
+    "specifications": [
+      {
+        "label": "Material",
+        "value": "Mesh & Fabric"
+      },
+      {
+        "label": "Weight Limit",
+        "value": "120 kg"
+      }
+    ],
+    "image": "https://firebasestorage.googleapis.com/v0/b/badhee.firebasestorage.app/o/product_images%2Fn7rbJXYNIjetMpy4Os2bxvFjxF83_1768586125683_0.jpg?alt=media&token=b4bbd057-113f-452b-9a61-5e820ea24734",
+    "images": [
+      "https://firebasestorage.googleapis.com/v0/b/badhee.firebasestorage.app/o/product_images%2Fn7rbJXYNIjetMpy4Os2bxvFjxF83_1768586125683_0.jpg?alt=media&token=b4bbd057-113f-452b-9a61-5e820ea24734"
+    ],
+    "inStock": true,
+    "showroomName": "Yuvraj furniture",
+    "showroomAddress": "Yuvraj ",
+    "showroomPhone": "7300413137",
+    "createdAt": {
+      "_seconds": 1768586128,
+      "_nanoseconds": 550000000
+    },
+    "updatedAt": {
+      "_seconds": 1768586128,
+      "_nanoseconds": 550000000
+    }
+  },
+  {
+    "firestoreId": "9CpJwDSZUvQdT7dQwr6r",
+    "partnerId": "k0Gag39YSWeqKsD0IoPbzJqgyGs1",
+    "name": "Ergonomic Office Chair",
+    "price": 8999,
+    "mrp": 15000,
+    "stock": 0,
+    "category": "Furniture",
+    "description": "Premium high-back chair with adjustable lumbar support.",
+    "warranty": "1 Year Warranty",
+    "care": "Wipe with dry cloth",
+    "brand": "ComfortSeats",
+    "specifications": [
+      {
+        "label": "Material",
+        "value": "Mesh & Fabric"
+      },
+      {
+        "label": "Weight Limit",
+        "value": "120 kg"
+      }
+    ],
+    "image": "https://firebasestorage.googleapis.com/v0/b/badhee.firebasestorage.app/o/product_images%2Fk0Gag39YSWeqKsD0IoPbzJqgyGs1_1769788190650_0.jpg?alt=media&token=0bd99447-d3ba-484b-a4d6-61107f1c0a0a",
+    "images": [
+      "https://firebasestorage.googleapis.com/v0/b/badhee.firebasestorage.app/o/product_images%2Fk0Gag39YSWeqKsD0IoPbzJqgyGs1_1769788190650_0.jpg?alt=media&token=0bd99447-d3ba-484b-a4d6-61107f1c0a0a",
+      "https://firebasestorage.googleapis.com/v0/b/badhee.firebasestorage.app/o/product_images%2Fk0Gag39YSWeqKsD0IoPbzJqgyGs1_1769788193810_1.jpg?alt=media&token=ce87f27c-2ed7-4709-80f0-f1f328646ee7",
+      "https://firebasestorage.googleapis.com/v0/b/badhee.firebasestorage.app/o/product_images%2Fk0Gag39YSWeqKsD0IoPbzJqgyGs1_1769788196677_2.jpg?alt=media&token=fa830e61-e4dc-4c6d-896a-557e8707c769"
+    ],
+    "inStock": true,
+    "showroomName": "Guruji furniture ",
+    "showroomAddress": "Khuri bari Laxmangarh ",
+    "showroomPhone": "8690350600",
+    "createdAt": {
+      "_seconds": 1769788201,
+      "_nanoseconds": 423000000
+    },
+    "updatedAt": {
+      "_seconds": 1769788201,
+      "_nanoseconds": 423000000
+    }
+  },
+  {
+    "firestoreId": "DRqhemMZVOURjaJlZW55",
+    "partnerId": "k0Gag39YSWeqKsD0IoPbzJqgyGs1",
+    "name": "Ergonomic Office Chair",
+    "price": 8999,
+    "mrp": 15000,
+    "stock": 0,
+    "category": "Furniture",
+    "description": "Premium high-back chair with adjustable lumbar support.",
+    "warranty": "1 Year Warranty",
+    "care": "Wipe with dry cloth",
+    "brand": "ComfortSeats",
+    "specifications": [
+      {
+        "label": "Material",
+        "value": "Mesh & Fabric"
+      },
+      {
+        "label": "Weight Limit",
+        "value": "120 kg"
+      }
+    ],
+    "image": "https://firebasestorage.googleapis.com/v0/b/badhee.firebasestorage.app/o/product_images%2Fk0Gag39YSWeqKsD0IoPbzJqgyGs1_1769786195143_0.jpg?alt=media&token=a2751e5b-df53-445b-bd0c-43c84e8eca5b",
+    "images": [
+      "https://firebasestorage.googleapis.com/v0/b/badhee.firebasestorage.app/o/product_images%2Fk0Gag39YSWeqKsD0IoPbzJqgyGs1_1769786195143_0.jpg?alt=media&token=a2751e5b-df53-445b-bd0c-43c84e8eca5b"
+    ],
+    "showroomName": "Guruji furniture ",
+    "showroomAddress": "Khuri bari Laxmangarh ",
+    "showroomPhone": "8690350600",
+    "createdAt": {
+      "_seconds": 1769786200,
+      "_nanoseconds": 257000000
+    },
+    "updatedAt": {
+      "_seconds": 1769786200,
+      "_nanoseconds": 257000000
+    },
+    "inStock": true
+  },
+  {
+    "firestoreId": "HkY1ktz368XWSvbkFux5",
+    "partnerId": "n7rbJXYNIjetMpy4Os2bxvFjxF83",
+    "name": "Ergonomic Office Chair",
+    "price": 8999,
+    "mrp": 15000,
+    "stock": 0,
+    "category": "Furniture",
+    "description": "Premium high-back chair with adjustable lumbar support.",
+    "warranty": "1 Year Warranty",
+    "care": "Wipe with dry cloth",
+    "brand": "ComfortSeats",
+    "specifications": [
+      {
+        "label": "Material",
+        "value": "Mesh & Fabric"
+      },
+      {
+        "label": "Weight Limit",
+        "value": "120 kg"
+      }
+    ],
+    "image": "https://firebasestorage.googleapis.com/v0/b/badhee.firebasestorage.app/o/product_images%2Fn7rbJXYNIjetMpy4Os2bxvFjxF83_1768586060464_0.jpg?alt=media&token=5bd9e7d7-afb6-47cf-8b38-a05f139841e8",
+    "images": [
+      "https://firebasestorage.googleapis.com/v0/b/badhee.firebasestorage.app/o/product_images%2Fn7rbJXYNIjetMpy4Os2bxvFjxF83_1768586060464_0.jpg?alt=media&token=5bd9e7d7-afb6-47cf-8b38-a05f139841e8"
+    ],
+    "inStock": true,
+    "showroomName": "Yuvraj furniture",
+    "showroomAddress": "Yuvraj ",
+    "showroomPhone": "7300413137",
+    "createdAt": {
+      "_seconds": 1768586063,
+      "_nanoseconds": 462000000
+    },
+    "updatedAt": {
+      "_seconds": 1768586063,
+      "_nanoseconds": 462000000
+    }
+  },
+  {
+    "firestoreId": "JeGNsmPegNGBQVDazGTe",
+    "partnerId": "JJb06644bvWiA9NSLq4VwXMSeY23",
+    "name": "Table",
+    "price": 8999,
+    "mrp": 15000,
+    "stock": 23,
+    "category": "Furniture",
+    "description": "Premium high-back chair with adjustable lumbar support.",
+    "warranty": "1 Year Warranty",
+    "care": "Wipe with dry cloth",
+    "brand": "ComfortSeats",
+    "specifications": [
+      {
+        "label": "Material",
+        "value": "Mesh & Fabric"
+      },
+      {
+        "label": "Weight Limit",
+        "value": "10 kg"
+      }
+    ],
+    "image": "https://firebasestorage.googleapis.com/v0/b/badhee.firebasestorage.app/o/product_images%2FJJb06644bvWiA9NSLq4VwXMSeY23_1769792644372_0.jpg?alt=media&token=8af74b58-941c-4d35-8fef-1419646fd0d2",
+    "images": [
+      "https://firebasestorage.googleapis.com/v0/b/badhee.firebasestorage.app/o/product_images%2FJJb06644bvWiA9NSLq4VwXMSeY23_1769792644372_0.jpg?alt=media&token=8af74b58-941c-4d35-8fef-1419646fd0d2",
+      "https://firebasestorage.googleapis.com/v0/b/badhee.firebasestorage.app/o/product_images%2FJJb06644bvWiA9NSLq4VwXMSeY23_1769792646399_1.jpg?alt=media&token=a33b1c6b-e416-4179-8c55-7549af0f0c02"
+    ],
+    "inStock": true,
+    "showroomName": "Unnati Furniture",
+    "showroomAddress": "Opposite J.K Modi school road No 2 ",
+    "showroomPhone": "9462038227",
+    "createdAt": {
+      "_seconds": 1769792651,
+      "_nanoseconds": 882000000
+    },
+    "updatedAt": {
+      "_seconds": 1769792651,
+      "_nanoseconds": 882000000
+    }
+  },
+  {
+    "firestoreId": "kS3aHcDfKI8kynrLYEHd",
+    "partnerId": "n7rbJXYNIjetMpy4Os2bxvFjxF83",
+    "name": "Ergonomic Office Chair",
+    "price": 8999,
+    "mrp": 15000,
+    "stock": 0,
+    "category": "Furniture",
+    "description": "Premium high-back chair with adjustable lumbar support.",
+    "warranty": "1 Year Warranty",
+    "care": "Wipe with dry cloth",
+    "brand": "ComfortSeats",
+    "specifications": [
+      {
+        "label": "Material",
+        "value": "Mesh & Fabric"
+      },
+      {
+        "label": "Weight Limit",
+        "value": "120 kg"
+      }
+    ],
+    "image": "https://firebasestorage.googleapis.com/v0/b/badhee.firebasestorage.app/o/product_images%2Fn7rbJXYNIjetMpy4Os2bxvFjxF83_1768586107661_0.jpg?alt=media&token=5464408d-f466-437e-9780-a5eeba2f8cca",
+    "images": [
+      "https://firebasestorage.googleapis.com/v0/b/badhee.firebasestorage.app/o/product_images%2Fn7rbJXYNIjetMpy4Os2bxvFjxF83_1768586107661_0.jpg?alt=media&token=5464408d-f466-437e-9780-a5eeba2f8cca"
+    ],
+    "showroomName": "Yuvraj furniture",
+    "showroomAddress": "Yuvraj ",
+    "showroomPhone": "7300413137",
+    "createdAt": {
+      "_seconds": 1768586111,
+      "_nanoseconds": 238000000
+    },
+    "updatedAt": {
+      "_seconds": 1768586111,
+      "_nanoseconds": 238000000
+    },
+    "inStock": true
+  },
+  {
+    "firestoreId": "y94hztFqPAa1TL1R7vaU",
+    "partnerId": "n7rbJXYNIjetMpy4Os2bxvFjxF83",
+    "name": "Ergonomic Office Chair",
+    "price": 8999,
+    "category": "Furniture",
+    "description": "Premium high-back chair with adjustable lumbar support.",
+    "warranty": "1 Year Warranty",
+    "care": "Wipe with dry cloth",
+    "brand": "ComfortSeats",
+    "specifications": [
+      {
+        "label": "Material",
+        "value": "Mesh & Fabric"
+      },
+      {
+        "label": "Weight Limit",
+        "value": "120 kg"
+      }
+    ],
+    "image": "https://firebasestorage.googleapis.com/v0/b/badhee.firebasestorage.app/o/product_images%2Fn7rbJXYNIjetMpy4Os2bxvFjxF83_1768040140656_0.jpg?alt=media&token=6528923e-f9ea-42b1-9f6f-94ba8fdf8b7e",
+    "images": [
+      "https://firebasestorage.googleapis.com/v0/b/badhee.firebasestorage.app/o/product_images%2Fn7rbJXYNIjetMpy4Os2bxvFjxF83_1768040140656_0.jpg?alt=media&token=6528923e-f9ea-42b1-9f6f-94ba8fdf8b7e"
+    ],
+    "createdAt": {
+      "_seconds": 1768040147,
+      "_nanoseconds": 547000000
+    },
+    "showroomName": "Yuvraj furniture",
+    "showroomAddress": "Yuvraj ",
+    "mrp": 25000,
+    "showroomPhone": "7300413137",
+    "stock": 20,
+    "updatedAt": {
+      "_seconds": 1768059558,
+      "_nanoseconds": 168000000
+    },
+    "inStock": true
+  }
+]

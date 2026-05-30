@@ -48,3 +48,8 @@ app-example
 /ios
 /android
 .vercel
+
+badhee-f0dec6964ef2.json
+*.json.credentials
+scrap/
+scratch/
