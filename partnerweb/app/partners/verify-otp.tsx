@@ -81,10 +81,11 @@ const OTPScreen = () => {
                 // ── Default OTP matched — bypass Supabase SMS OTP ────────────────
                 console.log("Default OTP matched — bypassing SMS OTP");
 
+                const syntheticEmail = partnerByPhone.email || `${mobileClean}@badheeg.com`;
                 const syntheticPassword = partnerByPhone.password || mobileClean;
 
                 const { data: signInData, error: signInError } = await supabase.auth.signInWithPassword({
-                    phone: `+91${mobileClean}`,
+                    email: syntheticEmail,
                     password: syntheticPassword,
                 });
 
