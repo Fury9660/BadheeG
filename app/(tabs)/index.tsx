@@ -239,13 +239,13 @@ const HomeScreen = () => {
   // Fetch all partners/users to map showroom names correctly
   const fetchShowrooms = async () => {
     try {
-      const { data: partners } = await supabase.from('pre_approved_partners').select('id, user_id, store_name, business_name, owner_name, status');
+      const { data: partners } = await supabase.from('pre_approved_partners').select('id, user_id, store_name, owner_name, status');
       const { data: users } = await supabase.from('profiles').select('id, name');
 
       setShowrooms((prev: any) => {
         const newMap = { ...prev };
         partners?.forEach((p: any) => {
-          const name = p.store_name || p.business_name || p.owner_name;
+          const name = p.store_name || p.owner_name;
           // Store both name and status
           if (p.user_id) newMap[p.user_id] = { name, status: p.status };
           if (p.id) newMap[p.id] = { name, status: p.status };
