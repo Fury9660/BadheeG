@@ -31,6 +31,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [partnerId, setPartnerId] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
+  const lastUserIdRef = React.useRef<string | null>(null);
+
   const fetchPartnerStatus = async (userObj: User) => {
     try {
       console.log("Fetching partner status for user_id:", userObj.id, "and Phone:", userObj.phone);
@@ -133,9 +135,13 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         const { data: { session } } = await supabase.auth.getSession();
 
         if (session && isMounted) {
-          setSession(session);
-          setUser(session.user);
-          await fetchPartnerStatus(session.user);
+          const userId = session.user.id;
+          if (lastUserIdRef.current !== userId) {
+            lastUserIdRef.current = userId;
+            setSession(session);
+            setUser(session.user);
+            await fetchPartnerStatus(session.user);
+          }
         }
       } catch (error) {
         console.error("Auth initialization error:", error);
@@ -147,17 +153,41 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     initializeAuth();
 
     // Listen for auth changes
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
       if (!isMounted) return;
 
-      setSession(session);
-      setUser(session?.user ?? null);
+      const userId = session?.user?.id ?? null;
+      console.log(`onAuthStateChange event: ${event}, user: ${userId}`);
 
+      if (event === 'SIGNED_OUT') {
+        lastUserIdRef.current = null;
+        setSession(null);
+        setUser(null);
+        setPartnerId(null);
+        setPartnerStatus(null);
+        setIsLoading(false);
+        return;
+      }
+
+      // If token refreshed or other event, but user is the same, just update session and user without showing loading or re-fetching
+      if (userId && lastUserIdRef.current === userId) {
+        setSession(session);
+        setUser(session?.user ?? null);
+        return;
+      }
+
+      // If user changed or logged in
       if (session?.user) {
+        lastUserIdRef.current = userId;
+        setSession(session);
+        setUser(session.user);
         setIsLoading(true); // Set loading while we fetch status for new auth state
         await fetchPartnerStatus(session.user);
         setIsLoading(false);
       } else {
+        lastUserIdRef.current = null;
+        setSession(null);
+        setUser(null);
         setPartnerId(null);
         setPartnerStatus(null);
         setIsLoading(false);
