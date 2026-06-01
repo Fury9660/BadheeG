@@ -101,7 +101,7 @@ const InventoryScreen = () => {
     useEffect(() => {
         if (!user) return;
         fetchData();
-        const channel = supabase.channel(`inventory-realtime-${user.id}`)
+        const channel = supabase.channel(`inventory-realtime-${user.id}-${Math.random().toString(36).substring(7)}`)
             .on('postgres_changes',
                 { event: '*', schema: 'public', table: 'products', filter: `partner_id=eq.${user.id}` },
                 () => fetchData()

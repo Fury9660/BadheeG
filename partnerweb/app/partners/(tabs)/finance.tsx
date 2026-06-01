@@ -40,7 +40,7 @@ const FinanceScreen = () => {
         if (!user) return;
         fetchData();
         const targetPartnerId = partnerId || user.id;
-        const channel = supabase.channel('finance-realtime')
+        const channel = supabase.channel(`finance-realtime-${Math.random().toString(36).substring(7)}`)
             .on('postgres_changes', { event: '*', schema: 'public', table: 'orders', filter: `partner_id=eq.${targetPartnerId}` }, fetchData)
             .subscribe();
         return () => { supabase.removeChannel(channel); };

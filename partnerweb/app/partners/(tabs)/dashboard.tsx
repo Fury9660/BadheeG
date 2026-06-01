@@ -116,7 +116,7 @@ export default function PartnerDashboard() {
         if (!user) return;
 
         const targetPartnerId = partnerId || user.id;
-        const channel = supabase.channel(`dashboard-${user.id}`)
+        const channel = supabase.channel(`dashboard-${user.id}-${Math.random().toString(36).substring(7)}`)
             .on('postgres_changes', { event: '*', schema: 'public', table: 'orders', filter: `partner_id=eq.${targetPartnerId}` }, () => {
                 fetchData();
             })

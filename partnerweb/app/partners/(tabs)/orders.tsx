@@ -83,7 +83,7 @@ const OrdersScreen = () => {
     useEffect(() => {
         fetchData();
 
-        const channel = supabase.channel('orders-list-v3')
+        const channel = supabase.channel(`orders-list-v3-${Math.random().toString(36).substring(7)}`)
             .on('postgres_changes', { event: '*', schema: 'public', table: 'orders', filter: resolvedPartnerId ? `partner_id=eq.${resolvedPartnerId}` : undefined }, fetchData)
             .subscribe();
 

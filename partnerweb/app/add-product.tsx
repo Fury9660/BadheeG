@@ -283,7 +283,7 @@ const AddProductScreen = () => {
             }
 
             const productData = {
-                partner_id: partnerId || user?.id,
+                partner_id: user.id,
                 name,
                 price: parseInt(price),
                 mrp: parseInt(mrp) || 0,
