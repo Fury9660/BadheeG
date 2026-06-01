@@ -139,7 +139,7 @@ const InventoryScreen = () => {
     const saveSingle = async (item: any) => {
         const vals = editValues[item.id];
         if (!vals?.name?.trim()) {
-            Alert.alert('Product ka naam daalo pehle!');
+            Alert.alert('Please enter a product name first!');
             return;
         }
         const price = parseFloat(vals.price) || 0;
@@ -200,7 +200,7 @@ const InventoryScreen = () => {
         }
 
         setSaving(false);
-        Alert.alert('Done!', `${successCount} products save ho gaye!\n${skipped} products mein naam/price missing tha.`);
+        Alert.alert('Done!', `${successCount} products saved successfully!\n${skipped} products had missing name or price.`);
         fetchData();
         if (skipped === 0) setBulkEditMode(false);
     };
@@ -268,7 +268,7 @@ const InventoryScreen = () => {
                         <View style={styles.editFields}>
                             <TextInput
                                 style={styles.editInput}
-                                placeholder="Product ka naam *"
+                                placeholder="Product name *"
                                 placeholderTextColor="#9CA3AF"
                                 value={vals.name}
                                 onChangeText={v => updateField(item.id, 'name', v)}
@@ -303,12 +303,12 @@ const InventoryScreen = () => {
                         // NORMAL VIEW
                         <>
                             <Text style={[styles.productName, isPholder && { color: '#F59E0B' }]} numberOfLines={2}>
-                                {isPholder ? '⚠️ Naam missing — Edit karo' : item.name}
+                                {isPholder ? '⚠️ Name missing — Edit' : item.name}
                             </Text>
                             <Text style={styles.productBrand} numberOfLines={1}>{item.brand || item.category || 'Furniture'}</Text>
                             <View style={styles.priceRow}>
                                 <Text style={styles.productPrice}>
-                                    {item.price > 1 ? `₹${item.price?.toLocaleString()}` : 'Price set karo'}
+                                    {item.price > 1 ? `₹${item.price?.toLocaleString()}` : 'Set price'}
                                 </Text>
                                 <TouchableOpacity onPress={() => router.push({ pathname: '/add-product', params: { id: item.id } })}>
                                     <Feather name="edit-2" size={16} color="#666666" />
@@ -331,7 +331,7 @@ const InventoryScreen = () => {
                     <Text style={styles.title}>Catalog</Text>
                     {pendingCount > 0 && (
                         <Text style={styles.pendingWarning}>
-                            ⚠️ {pendingCount} products ko details chahiye
+                            ⚠️ {pendingCount} products need details
                         </Text>
                     )}
                 </View>
@@ -359,7 +359,7 @@ const InventoryScreen = () => {
                 <View style={styles.bulkBanner}>
                     <View>
                         <Text style={styles.bulkBannerTitle}>🚀 Bulk Edit Mode — {pendingCount} products pending</Text>
-                        <Text style={styles.bulkBannerSub}>Har product ke neeche naam aur price dalo, phir "Save All" karo</Text>
+                        <Text style={styles.bulkBannerSub}>Enter name and price for each product, then click "Save All"</Text>
                     </View>
                     <TouchableOpacity
                         style={[styles.saveAllBtn, saving && { opacity: 0.6 }]}
