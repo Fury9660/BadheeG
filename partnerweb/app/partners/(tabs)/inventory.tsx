@@ -546,6 +546,7 @@ const styles = StyleSheet.create({
         paddingVertical: 7,
         fontSize: 12,
         color: '#000',
+        minWidth: 0,
         ...Platform.select({ web: { outlineStyle: 'none' } as any })
     },
     priceRowEdit: { flexDirection: 'row', gap: 6 },
