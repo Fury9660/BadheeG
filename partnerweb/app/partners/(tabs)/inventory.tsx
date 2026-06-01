@@ -303,7 +303,7 @@ const InventoryScreen = () => {
                         // NORMAL VIEW
                         <>
                             <Text style={[styles.productName, isPholder && { color: '#F59E0B' }]} numberOfLines={2}>
-                                {isPholder ? '⚠️ Name missing — Edit' : item.name}
+                                {isPholder ? 'Name missing — Edit' : item.name}
                             </Text>
                             <Text style={styles.productBrand} numberOfLines={1}>{item.brand || item.category || 'Furniture'}</Text>
                             <View style={styles.priceRow}>
@@ -331,7 +331,7 @@ const InventoryScreen = () => {
                     <Text style={styles.title}>Catalog</Text>
                     {pendingCount > 0 && (
                         <Text style={styles.pendingWarning}>
-                            ⚠️ {pendingCount} products need details
+                            {pendingCount} products need details
                         </Text>
                     )}
                 </View>
@@ -358,7 +358,7 @@ const InventoryScreen = () => {
             {bulkEditMode && pendingCount > 0 && (
                 <View style={styles.bulkBanner}>
                     <View>
-                        <Text style={styles.bulkBannerTitle}>🚀 Bulk Edit Mode — {pendingCount} products pending</Text>
+                        <Text style={styles.bulkBannerTitle}>Bulk Edit Mode — {pendingCount} products pending</Text>
                         <Text style={styles.bulkBannerSub}>Enter name and price for each product, then click "Save All"</Text>
                     </View>
                     <TouchableOpacity
@@ -529,7 +529,7 @@ const styles = StyleSheet.create({
         borderRadius: 8,
     },
     pendingBadgeText: { color: '#fff', fontSize: 10, fontWeight: '800' },
-    productInfo: { marginTop: 8, paddingBottom: 4 },
+    productInfo: { marginTop: 8, paddingBottom: 10, paddingHorizontal: 10 },
     productName: { fontSize: 13, fontWeight: '700', color: '#000', lineHeight: 18, marginBottom: 2 },
     productBrand: { fontSize: 11, color: '#6B7280', marginBottom: 8 },
     priceRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
@@ -554,7 +554,7 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         justifyContent: 'center',
         gap: 4,
-        backgroundColor: '#4F46E5',
+        backgroundColor: '#10B981',
         paddingVertical: 8,
         borderRadius: 8,
     },
