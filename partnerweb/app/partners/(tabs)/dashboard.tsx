@@ -224,7 +224,7 @@ export default function PartnerDashboard() {
                     {/* Quick Actions */}
                     <Text style={[styles.sectionTitle, { color: theme.text, marginTop: 32 }]}>Quick Actions</Text>
                     <View style={styles.actionGrid}>
-                        <QuickAction title="Add Product" icon="plus-box-multiple" color="#4F46E5" route="/partners/add-product" />
+                        <QuickAction title="Add Product" icon="plus-box-multiple" color="#4F46E5" route="/add-product" />
                         <QuickAction title="All Orders" icon="clipboard-list" color="#10B981" route="/partners/orders" />
                         <QuickAction title="Inventory" icon="package-variant" color="#F59E0B" route="/partners/inventory" />
                         <QuickAction title="Analytics" icon="google-analytics" color="#EC4899" route="/partners/finance" />
