@@ -15,6 +15,8 @@ export default function Index() {
     const router = useRouter();
     const { user, partnerStatus, isLoading: isAuthLoading } = useAuth();
     const [windowWidth, setWindowWidth] = useState(Dimensions.get("window").width);
+    // Prevent re-redirect on token refresh (user object changes reference but ID is same)
+    const hasRedirectedRef = React.useRef(false);
 
     useEffect(() => {
         const onChange = ({ window }: { window: any }) => {
@@ -33,16 +35,20 @@ export default function Index() {
     );
 
     useEffect(() => {
-        if (!isAuthLoading && user && partnerStatus) {
+        if (!isAuthLoading && user?.id && partnerStatus) {
+            // Only redirect once per page mount - avoid re-firing on token refresh
+            if (hasRedirectedRef.current) return;
             const status = partnerStatus.toLowerCase();
             // Immediate redirection based on status
             if (status === 'approved' || status === 'active') {
+                hasRedirectedRef.current = true;
                 router.replace('/partners/dashboard');
             } else if (status === 'pending') {
+                hasRedirectedRef.current = true;
                 router.replace('/partners/approval-pending');
             }
         }
-    }, [user, partnerStatus, isAuthLoading]);
+    }, [user?.id, partnerStatus, isAuthLoading]);
 
     if (isAuthLoading || (user && isRedirecting)) {
         return (

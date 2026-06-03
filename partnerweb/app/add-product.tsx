@@ -110,6 +110,7 @@ const AddProductScreen = () => {
     const isDesktop = width > 1024;
 
     const { user, partnerId } = useAuth();
+    const hasFetchedRef = React.useRef(false);
 
     // --- States ---
     const [images, setImages] = useState<string[]>([]);
@@ -141,6 +142,10 @@ const AddProductScreen = () => {
     };
 
     useEffect(() => {
+        // Guard: only fetch once per mount to prevent re-runs on token refresh
+        if (hasFetchedRef.current) return;
+        hasFetchedRef.current = true;
+
         const fetchPartnerData = async () => {
             const targetId = partnerId || user?.id;
             if (!targetId) return;
@@ -195,7 +200,7 @@ const AddProductScreen = () => {
             };
             fetchProductData();
         }
-    }, [user, id]);
+    }, [user?.id, id]);
 
     const scanLineY = useSharedValue(0);
     const scanStyle = useAnimatedStyle(() => ({ transform: [{ translateY: scanLineY.value }], opacity: isScanning ? 1 : 0 }));

@@ -31,7 +31,7 @@ export default function TabLayout() {
             } else if (status === 'unregistered') {
                 router.replace({
                     pathname: '/partners/register',
-                    params: { phoneNumber: user.phone, uid: user.id }
+                    params: { phoneNumber: user?.phone, uid: user?.id }
                 });
             } else {
                 // For any other status (rejected, suspended, error, etc.)
@@ -39,7 +39,7 @@ export default function TabLayout() {
                 router.replace('/partners/login');
             }
         }
-    }, [user, partnerStatus, isLoading]);
+    }, [user?.id, partnerStatus, isLoading]);
 
     const currentStatus = partnerStatus?.toLowerCase();
     if (isLoading || (user && currentStatus !== 'approved' && currentStatus !== 'active')) {
