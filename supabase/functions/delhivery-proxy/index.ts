@@ -136,6 +136,299 @@ serve(async (req) => {
     const respond = (data: any, status = 200) =>
       new Response(JSON.stringify(data), { status, headers: { ...corsHeaders, 'Content-Type': 'application/json' } })
 
+    // AUTO MANIFEST
+    if (action === 'auto-manifest') {
+      const { orderId } = details
+      if (!orderId) throw new Error('orderId is required')
+
+      console.log(`Starting auto-manifest for order ID: ${orderId}`)
+
+      // 1. Fetch order
+      const { data: order, error: orderErr } = await supabaseClient
+        .from('orders')
+        .select('*')
+        .eq('id', orderId)
+        .single()
+
+      if (orderErr || !order) {
+        console.error(`Order not found: ${orderId}`, orderErr)
+        throw new Error(`Order not found: ${orderErr?.message || ''}`)
+      }
+
+      // If already manifested, return success
+      if (order.lrn_number || order.tracking_id) {
+        console.log(`Order ${orderId} already manifested: ${order.lrn_number || order.tracking_id}`)
+        return respond({ success: true, message: 'Already manifested', lrn: order.lrn_number || order.tracking_id })
+      }
+
+      // 2. Fetch address
+      const { data: addr, error: addrErr } = await supabaseClient
+        .from('addresses')
+        .select('*')
+        .eq('id', order.address_id)
+        .single()
+
+      if (addrErr || !addr) {
+        console.error(`Address not found: ${order.address_id}`, addrErr)
+        throw new Error(`Address not found: ${addrErr?.message || ''}`)
+      }
+
+      // 3. Fetch default warehouse
+      const { data: wh } = await supabaseClient
+        .from('delhivery_warehouses')
+        .select('name')
+        .eq('is_default', true)
+        .eq('is_active', true)
+        .maybeSingle()
+
+      const pickupLocation = wh?.name || 'MODERN FURNITURE CRAFT'
+
+      // 4. Construct payload
+      const shortOrderId = (order.order_id || order.id).substring(0, 25)
+      const totalValue = order.total_amount || 1000
+      const items = order.items || []
+      const desc = items.map((i: any) => i.name).join(', ') || 'Furniture'
+
+      const custName = addr.name || order.customer_name || 'Customer'
+      const custPhone = String(addr.mobile || addr.phone || '9999999999')
+      const custCity = addr.city || 'City'
+      const custState = addr.state || 'State'
+      const custPin = String(addr.pincode || '110001')
+      const custLine1 = addr.line1 || ''
+      const custLine2 = addr.line2 || ''
+
+      const fullAddress = [
+        custLine1,
+        custLine2,
+        `${custCity}, ${custState} - ${custPin}`,
+        `Ph: ${custPhone}`,
+      ].filter(Boolean).join(', ')
+
+      const payload = {
+        pickup_location: pickupLocation,
+        gstin: 'UR',
+        dropoff_location: {
+          consignee: custName,
+          consignee_name: custName,
+          address: fullAddress,
+          city: custCity,
+          state: custState,
+          zip: custPin,
+          phone: custPhone,
+          mobile: custPhone,
+          gstin: 'UR',
+          gst_number: 'UR',
+        },
+        billing_address: {
+          name: 'BADHEE G',
+          company: 'BADHEE G',
+          consignor: 'BADHEE G',
+          address: 'Laxmangarh',
+          city: 'Laxmangarh',
+          state: 'Rajasthan',
+          pin: '332311',
+          phone: '9521633688',
+          gst_number: 'UR',
+          gstin: 'UR',
+        },
+        weight: 10,
+        n_value: totalValue,
+        d_mode: 'Prepaid',
+        product_type: 'S',
+        invoices: [{
+          ident: shortOrderId,
+          n_value: totalValue,
+          inv_num: 'INV-' + shortOrderId.substring(0, 8),
+          inv_amt: totalValue,
+          inv_date: new Date().toISOString().split('T')[0],
+        }],
+        suborders: [{
+          ident: shortOrderId,
+          suborder_id: shortOrderId + '-S',
+          weight: 10,
+          count: 1,
+          n_value: totalValue,
+          description: desc,
+        }],
+        shipments: [{
+          order_number: shortOrderId,
+          consignee: custName,
+          consignee_name: custName,
+          consignee_address: fullAddress,
+          consignee_city: custCity,
+          consignee_state: custState,
+          consignee_pincode: custPin,
+          consignee_phone: custPhone,
+          phone: custPhone,
+          mobile: custPhone,
+          consignee_gst_tin: 'UR',
+          payment_mode: (order.payment_method || 'online') === 'cod' ? 'cod' : 'prepaid',
+          total_amount: totalValue,
+          n_value: totalValue,
+          shipment_details: [{
+            n_value: totalValue,
+            description: desc,
+            weight: 10,
+            length: 30,
+            breadth: 30,
+            height: 30,
+            box_count: 1,
+            suborders: [{
+              ident: shortOrderId,
+              suborder_id: shortOrderId + '-S',
+              weight: 10,
+              count: 1,
+              n_value: totalValue,
+              description: desc,
+            }]
+          }],
+          invoices: [{
+            ident: shortOrderId,
+            n_value: totalValue,
+            inv_num: 'INV-' + shortOrderId.substring(0, 8),
+            inv_amt: totalValue,
+            inv_date: new Date().toISOString().split('T')[0],
+          }]
+        }]
+      }
+
+      console.log(`Auto-manifesting order ${orderId} with pickup location: ${pickupLocation}`)
+
+      // 5. Call Delhivery v2/manifest
+      const token = await getJwt(username, password, storedTok, BTOB_BASE, LTL_BASE, isTestMode)
+      await ensureWarehouse(token, pickupLocation, BTOB_BASE, LTL_BASE)
+
+      const manifestRes = await fetch(`${BTOB_BASE}/v2/manifest`, {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      })
+
+      const text = await manifestRes.text()
+      let initialData: any
+      try { initialData = JSON.parse(text) } catch { initialData = { raw: text } }
+      console.log(`Auto-manifest initial response for order ${orderId} (Status ${manifestRes.status}):`, text.slice(0, 500))
+
+      const jobId = initialData.data?.job_id || initialData.job_id
+      if (!jobId) {
+        throw new Error(initialData.message || initialData.error?.message || 'Failed to get Job ID from Delhivery')
+      }
+
+      // 6. Poll for LR number (up to 12 attempts of 5s)
+      let lrn: string | null = null
+      let waybill = ''
+      let labelUrl = ''
+
+      for (let i = 0; i < 12; i++) {
+        console.log(`Polling for job ${jobId} (Attempt ${i + 1}/12)...`)
+        await new Promise(r => setTimeout(r, 5000))
+        const pollRes = await fetch(`${BTOB_BASE}/v2/manifest?job_id=${jobId}`, {
+          headers: { 'Authorization': `Bearer ${token}` },
+        })
+        const pollText = await pollRes.text()
+        let pollData: any
+        try { pollData = JSON.parse(pollText) } catch { pollData = { raw: pollText } }
+
+        const jobStatus = pollData?.status || pollData
+        if (jobStatus?.type === 'Complete' && jobStatus?.success) {
+          lrn = jobStatus.value?.lrnum || jobStatus.value?.waybills?.[0]?.ident
+          waybill = jobStatus.value?.waybills?.[0]?.ident || ''
+          console.log(`Job complete! LR Number: ${lrn}, Waybill: ${waybill}`)
+          
+          // Try to get label immediately
+          const attemptsList: any[] = []
+          const ids = [...new Set([waybill, lrn].filter(Boolean))]
+          for (const id of ids) {
+            attemptsList.push(
+              { label: `GET-URLS-LTL-A4-${id}`,   method: 'GET',  url: `${LTL_BASE}/v2/get-label-urls/A4/${id}` },
+              { label: `GET-URLS-LTL-a4-${id}`,   method: 'GET',  url: `${LTL_BASE}/v2/get-label-urls/a4/${id}` },
+              { label: `GEN-PDF-LTL-${id}`,        method: 'POST', url: `${LTL_BASE}/docket/generate_label_pdf`, body: JSON.stringify({ lrns: [id] }) },
+              { label: `GEN-PDF-LTL-v1-${id}`,     method: 'POST', url: `${LTL_BASE}/v1/docket/generate_label_pdf`, body: JSON.stringify({ lrns: [id] }) },
+              { label: `GET-URLS-BTOB-A4-${id}`,   method: 'GET',  url: `${BTOB_BASE}/v2/get-label-urls/A4/${id}` },
+              { label: `GET-URLS-BTOB-a4-${id}`,   method: 'GET',  url: `${BTOB_BASE}/v2/get-label-urls/a4/${id}` },
+              { label: `GET-URLS-BTOB-no-size-${id}`, method: 'GET', url: `${BTOB_BASE}/v2/get-label-urls/${id}` },
+              { label: `GET-URLS-BTOB-qp-${id}`,   method: 'GET',  url: `${BTOB_BASE}/v2/get-label-urls?lrn=${id}&size=A4` },
+              { label: `GEN-PDF-BTOB-${id}`,       method: 'POST', url: `${BTOB_BASE}/docket/generate_label_pdf`, body: JSON.stringify({ lrns: [id] }) },
+              { label: `GEN-PDF-BTOB-v2-${id}`,    method: 'POST', url: `${BTOB_BASE}/v2/label`, body: JSON.stringify({ lrn: id, size: 'A4' }) },
+              { label: `GET-LABEL-BTOB-${id}`,     method: 'GET',  url: `${BTOB_BASE}/v2/label/${id}` },
+              { label: `DIRECT-LTL-${id}`,         method: 'GET',  url: `${LTL_BASE}/label/print/a4/${id}` },
+            )
+          }
+
+          const authPrefix = token.startsWith('eyJ') ? 'Bearer' : 'Token'
+
+          for (const attempt of attemptsList) {
+            try {
+              const hdrs: Record<string,string> = {
+                'Authorization': `${authPrefix} ${token}`,
+                'Content-Type': 'application/json',
+              }
+              const opts: RequestInit = { method: attempt.method, headers: hdrs }
+              if (attempt.body) opts.body = attempt.body
+              const res = await fetch(attempt.url, opts)
+              const text = await res.text()
+              let data: any
+              try { data = JSON.parse(text) } catch { data = { raw: text.slice(0, 200) } }
+
+              let found: string | null = null
+              if (Array.isArray(data?.data) && data.data.length > 0) found = data.data[0]
+              found = found || data?.label_url || data?.url || data?.pdf_url
+              if (!found && Array.isArray(data) && data.length > 0) found = data[0]
+              if (!found && Array.isArray(data?.urls) && data.urls.length > 0) found = data.urls[0]
+
+              if (found && typeof found === 'string' && found.startsWith('http')) {
+                labelUrl = found
+                console.log(`Auto-manifest: Label URL retrieved: ${labelUrl}`)
+                break
+              }
+
+              if (res.status === 302 || res.status === 301) {
+                const loc = (res.headers as any).get?.('location')
+                if (loc && loc.startsWith('http')) {
+                  labelUrl = loc
+                  console.log(`Auto-manifest: Label URL retrieved via redirect: ${labelUrl}`)
+                  break
+                }
+              }
+            } catch (e: any) {
+              console.log(`Auto-manifest: label attempt ${attempt.label} failed: ${e.message}`)
+            }
+          }
+          break
+        }
+        if (jobStatus?.type === 'Complete' && !jobStatus?.success) {
+          console.error(`Job failed:`, jobStatus)
+          throw new Error(jobStatus.reason || 'Shipment creation failed')
+        }
+      }
+
+      if (!lrn) {
+        throw new Error(`Job ${jobId} submitted but LR not received yet.`)
+      }
+
+      // 7. Update order in DB
+      console.log(`Updating order ${orderId} in database with LR: ${lrn}`)
+      const { error: updateErr } = await supabaseClient
+        .from('orders')
+        .update({
+          tracking_id: lrn,
+          lrn_number: lrn,
+          waybill: waybill || null,
+          label_url: labelUrl || null,
+          delhivery_job_id: jobId,
+          delhivery_status: 'manifested',
+          status: 'processing',
+        })
+        .eq('id', orderId)
+
+      if (updateErr) {
+        console.error(`Failed to update order in database:`, updateErr)
+        throw new Error(`Failed to update order with tracking info: ${updateErr.message}`)
+      }
+
+      return respond({ success: true, lrn, waybill, labelUrl, jobId })
+    }
+
     // LOGIN
     if (action === 'login' || action === 'auto-login') {
       const jwt = await getJwt(username, password, storedTok, BTOB_BASE, LTL_BASE, isTestMode)
